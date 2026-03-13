@@ -72,10 +72,10 @@ synapse/
 
 | ID | タスク | 状態 |
 |----|--------|------|
-| 2-1 | engine.py に run_synapse_lp() 追加 | 未着手 |
-| 2-2 | LP用Orchestratorフロー | 未着手 |
-| 2-3 | LP用Coderフロー（HTML生成） | 未着手 |
-| 2-4 | LP用Reviewerフロー | 未着手 |
+| 2-1 | lp_engine.py に run_synapse_lp() 実装 | 完了 |
+| 2-2 | LP用Orchestratorフロー | 完了 |
+| 2-3 | LP用Coderフロー（HTML生成+ドラフト生成） | 完了 |
+| 2-4 | LP用Reviewerフロー（構造+コピー検証） | 完了 |
 
 ### Phase 3: 画像化パイプライン
 
