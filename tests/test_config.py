@@ -1,7 +1,7 @@
 """config.py のテスト"""
 from synapse.config import (
-    COMMAND_TIMEOUT,
     CODER_MODEL,
+    COMMAND_TIMEOUT,
     MAX_FILE_READ_SIZE,
     MAX_ROUNDS,
     MAX_TOKENS,
