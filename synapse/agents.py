@@ -4,9 +4,9 @@ Anthropic Tool Use API のループを管理する
 """
 
 import json
-from synapse.sandbox import Sandbox
-from synapse.tools import execute_tool
+
 from synapse.config import MAX_TOKENS, MAX_TOOL_ITERATIONS
+from synapse.tools import execute_tool
 
 
 def run_agent(client, model, system, messages, tools, sandbox, log_fn, max_iterations=None):

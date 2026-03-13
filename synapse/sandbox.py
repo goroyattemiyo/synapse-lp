@@ -3,12 +3,13 @@ Synapse - サンドボックス
 隔離されたワークスペースでファイル操作とコマンド実行を行う
 """
 
-import subprocess
 import os
 import shutil
+import subprocess
 import tempfile
 from pathlib import Path
-from synapse.config import COMMAND_TIMEOUT, MAX_FILE_READ_SIZE, STDOUT_LIMIT, STDERR_LIMIT
+
+from synapse.config import COMMAND_TIMEOUT, MAX_FILE_READ_SIZE, STDERR_LIMIT, STDOUT_LIMIT
 
 
 class Sandbox:

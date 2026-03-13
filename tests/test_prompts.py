@@ -1,6 +1,9 @@
 """prompts.py のテスト"""
 from synapse.prompts import (
-    ORCHESTRATOR_SYSTEM, CODER_SYSTEM, REVIEWER_SYSTEM, ENV_CONTEXT,
+    CODER_SYSTEM,
+    ENV_CONTEXT,
+    ORCHESTRATOR_SYSTEM,
+    REVIEWER_SYSTEM,
 )
 
 

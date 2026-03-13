@@ -1,5 +1,5 @@
 """tools.py のテスト"""
-from synapse.tools import execute_tool, CODER_TOOLS, REVIEWER_TOOLS
+from synapse.tools import CODER_TOOLS, REVIEWER_TOOLS, execute_tool
 
 
 def test_execute_write_file(sandbox):

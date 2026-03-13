@@ -3,16 +3,18 @@ Synapse - メインエンジン
 Orchestrator → Coder → Reviewer のターンベースループ
 """
 
-import anthropic
 import json
 import os
 from datetime import datetime
-from synapse.sandbox import Sandbox
-from synapse.agents import run_agent
-from synapse.tools import CODER_TOOLS, REVIEWER_TOOLS
-from synapse.prompts import ORCHESTRATOR_SYSTEM, CODER_SYSTEM, REVIEWER_SYSTEM
-from synapse.config import ORCHESTRATOR_MODEL, CODER_MODEL, REVIEWER_MODEL, MAX_ROUNDS
+
+import anthropic
 from dotenv import load_dotenv
+
+from synapse.agents import run_agent
+from synapse.config import CODER_MODEL, MAX_ROUNDS, ORCHESTRATOR_MODEL, REVIEWER_MODEL
+from synapse.prompts import CODER_SYSTEM, ORCHESTRATOR_SYSTEM, REVIEWER_SYSTEM
+from synapse.sandbox import Sandbox
+from synapse.tools import CODER_TOOLS, REVIEWER_TOOLS
 
 load_dotenv()
 
@@ -40,10 +42,10 @@ def run_synapse_with_callback(user_goal: str, callback=None) -> dict:
         if callback:
             callback(agent, content)
 
-    log(f"{'='*60}")
-    log(f"Synapse v0.3.1 - Multi-Agent System")
+    log("=" * 60)
+    log("Synapse v0.3.1 - Multi-Agent System")
     log(f"Goal: {user_goal}")
-    log(f"{'='*60}\n")
+    log("=" * 60 + "\n")
 
     result = {
         "sandbox": sandbox,
@@ -73,9 +75,13 @@ def run_synapse_with_callback(user_goal: str, callback=None) -> dict:
 
             notify("System", "Coder が実装中...")
             if round_num == 1:
-                instruction = f"以下の計画に従って実装してください。ファイル数は最小限に:\n\n{orch_reply}"
+                instruction = (
+                    f"以下の計画に従って実装してください。ファイル数は最小限に:\n\n{orch_reply}"
+                )
             else:
-                instruction = f"以下の指摘を修正してください。修正箇所のみ対応:\n\n{reviewer_reply}"
+                instruction = (
+                    f"以下の指摘を修正してください。修正箇所のみ対応:\n\n{reviewer_reply}"
+                )
 
             coder_messages = [{"role": "user", "content": instruction}]
             coder_reply, _ = run_agent(

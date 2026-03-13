@@ -1,5 +1,4 @@
 """sandbox.py のテスト"""
-import os
 
 
 def test_write_and_read_file(sandbox):
