@@ -54,11 +54,11 @@ synapse/
 
 | ID | タスク | 状態 |
 |----|--------|------|
-| 0-1 | tests/ ディレクトリ作成, pytest導入 | 未着手 |
-| 0-2 | 既存コードのユニットテスト作成 | 未着手 |
-| 0-3 | CI定義（GitHub Actions） | 未着手 |
-| 0-4 | 型ヒント追加 + mypy設定 | 未着手 |
-| 0-5 | ruff（linter/formatter）設定 | 未着手 |
+| 0-1 | tests/ ディレクトリ作成, pytest導入 | 完了 |
+| 0-2 | 既存コードのユニットテスト作成 | 完了 |
+| 0-3 | CI定義（GitHub Actions） | 完了 |
+| 0-4 | 型ヒント追加 + mypy設定 | 完了 |
+| 0-5 | ruff（linter/formatter）設定 | 完了 |
 
 ### Phase 1: LP生成プロンプト設計
 
