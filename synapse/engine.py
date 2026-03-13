@@ -57,13 +57,20 @@ def run_synapse_with_callback(user_goal: str, callback=None) -> dict:
 
     try:
         notify("System", "Orchestrator が計画を作成中...")
-        orch_messages = [{
-            "role": "user",
-            "content": f"以下のゴールの実装計画を簡潔に作成してください:\n\n{user_goal}",
-        }]
+        orch_messages = [
+            {
+                "role": "user",
+                "content": f"以下のゴールの実装計画を簡潔に作成してください:\n\n{user_goal}",
+            }
+        ]
         orch_reply, _ = run_agent(
-            client, ORCHESTRATOR_MODEL, ORCHESTRATOR_SYSTEM,
-            orch_messages, None, sandbox, log,
+            client,
+            ORCHESTRATOR_MODEL,
+            ORCHESTRATOR_SYSTEM,
+            orch_messages,
+            None,
+            sandbox,
+            log,
         )
         notify("Orchestrator", orch_reply)
 
@@ -79,14 +86,17 @@ def run_synapse_with_callback(user_goal: str, callback=None) -> dict:
                     f"以下の計画に従って実装してください。ファイル数は最小限に:\n\n{orch_reply}"
                 )
             else:
-                instruction = (
-                    f"以下の指摘を修正してください。修正箇所のみ対応:\n\n{reviewer_reply}"
-                )
+                instruction = f"以下の指摘を修正してください。修正箇所のみ対応:\n\n{reviewer_reply}"
 
             coder_messages = [{"role": "user", "content": instruction}]
             coder_reply, _ = run_agent(
-                client, CODER_MODEL, CODER_SYSTEM,
-                coder_messages, CODER_TOOLS, sandbox, log,
+                client,
+                CODER_MODEL,
+                CODER_SYSTEM,
+                coder_messages,
+                CODER_TOOLS,
+                sandbox,
+                log,
             )
             notify("Coder", coder_reply)
 
@@ -99,8 +109,13 @@ def run_synapse_with_callback(user_goal: str, callback=None) -> dict:
             )
             reviewer_messages = [{"role": "user", "content": review_instruction}]
             reviewer_reply, _ = run_agent(
-                client, REVIEWER_MODEL, REVIEWER_SYSTEM,
-                reviewer_messages, REVIEWER_TOOLS, sandbox, log,
+                client,
+                REVIEWER_MODEL,
+                REVIEWER_SYSTEM,
+                reviewer_messages,
+                REVIEWER_TOOLS,
+                sandbox,
+                log,
             )
             notify("Reviewer", reviewer_reply)
 

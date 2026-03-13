@@ -1,4 +1,5 @@
 """prompts.py のテスト"""
+
 from synapse.prompts import (
     CODER_SYSTEM,
     ENV_CONTEXT,

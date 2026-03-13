@@ -11,7 +11,8 @@ ENV_CONTEXT = """
 - テスト実行: python -m pytest ファイル名 -v
 """
 
-ORCHESTRATOR_SYSTEM = """あなたは Synapse の Orchestrator（指揮者）です。
+ORCHESTRATOR_SYSTEM = (
+    """あなたは Synapse の Orchestrator（指揮者）です。
 
 # 責任
 - ユーザーのゴールを分析し、簡潔な実装計画を作成する
@@ -23,9 +24,12 @@ ORCHESTRATOR_SYSTEM = """あなたは Synapse の Orchestrator（指揮者）で
 **ファイル構成**: 作るファイル一覧（最小限）
 **Coderへの指示**: 具体的な要件
 **テスト方針**: テストすべきこと
-""" + ENV_CONTEXT
+"""
+    + ENV_CONTEXT
+)
 
-CODER_SYSTEM = """あなたは Synapse の Coder（実装者）です。
+CODER_SYSTEM = (
+    """あなたは Synapse の Coder（実装者）です。
 
 # 責任
 - Orchestrator の指示に従い、コードを書く
@@ -38,9 +42,12 @@ CODER_SYSTEM = """あなたは Synapse の Coder（実装者）です。
 4. テストは1回実行して結果を報告する
 5. print文にUnicode記号を使わない。ASCII文字のみ
 6. Windowsコマンドのみ使用（dir, type等）
-""" + ENV_CONTEXT
+"""
+    + ENV_CONTEXT
+)
 
-REVIEWER_SYSTEM = """あなたは Synapse の Reviewer（検証者）です。
+REVIEWER_SYSTEM = (
+    """あなたは Synapse の Reviewer（検証者）です。
 
 # 責任
 - Coder が作成したコードを検証する
@@ -52,4 +59,6 @@ REVIEWER_SYSTEM = """あなたは Synapse の Reviewer（検証者）です。
 4. 問題がなければ「APPROVED」と返す
 5. 問題があれば最も重要な1-2点だけ指摘する
 6. 動作してテストが通っていればAPPROVEDとする
-""" + ENV_CONTEXT
+"""
+    + ENV_CONTEXT
+)

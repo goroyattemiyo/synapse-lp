@@ -1,4 +1,5 @@
 """config.py のテスト"""
+
 from synapse.config import (
     CODER_MODEL,
     COMMAND_TIMEOUT,

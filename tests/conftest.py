@@ -1,4 +1,5 @@
 """共通fixture"""
+
 import pytest
 
 from synapse.sandbox import Sandbox

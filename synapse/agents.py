@@ -30,10 +30,12 @@ def run_agent(client, model, system, messages, tools, sandbox, log_fn, max_itera
             return text, kwargs["messages"]
 
         if response.stop_reason == "tool_use":
-            kwargs["messages"].append({
-                "role": "assistant",
-                "content": response.content,
-            })
+            kwargs["messages"].append(
+                {
+                    "role": "assistant",
+                    "content": response.content,
+                }
+            )
 
             tool_results = []
             for block in response.content:
@@ -44,16 +46,20 @@ def run_agent(client, model, system, messages, tools, sandbox, log_fn, max_itera
                     result = execute_tool(sandbox, block.name, block.input)
                     log_fn(f"  [Result] {str(result)[:500]}")
 
-                    tool_results.append({
-                        "type": "tool_result",
-                        "tool_use_id": block.id,
-                        "content": str(result),
-                    })
+                    tool_results.append(
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": block.id,
+                            "content": str(result),
+                        }
+                    )
 
-            kwargs["messages"].append({
-                "role": "user",
-                "content": tool_results,
-            })
+            kwargs["messages"].append(
+                {
+                    "role": "user",
+                    "content": tool_results,
+                }
+            )
         else:
             text = _extract_text(response)
             return text, kwargs["messages"]
