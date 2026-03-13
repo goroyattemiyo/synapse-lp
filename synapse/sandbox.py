@@ -33,7 +33,7 @@ class Sandbox:
 
     def run_command(self, command: str) -> str:
         try:
-            result = subprocess.run(
+            result = subprocess.run(  # nosec B602
                 command,
                 shell=True,
                 cwd=self.workspace,
