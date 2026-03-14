@@ -5,6 +5,7 @@ Synapse - 手動LP変換ユーティリティ
 
 import io
 import os
+import tempfile
 import zipfile
 
 from synapse.draft_generator import (
@@ -14,6 +15,7 @@ from synapse.draft_generator import (
 )
 from synapse.image_pipeline import (
     HAS_PLAYWRIGHT,
+    capture_sections,
     extract_sections,
     generate_manual_screenshot_guide,
 )
@@ -61,13 +63,18 @@ def build_chat_prompt(data: dict) -> str:
 
 
 def convert_html(html: str) -> dict:
-    """HTMLからBrain/Note素材を生成する。"""
+    """HTMLからBrain/Note素材＋セクション画像を生成する。"""
     sections = extract_sections(html)
     brain = generate_brain_draft(html, sections)
     note = generate_note_draft(html, sections)
     guide = generate_posting_guide(sections, brain, note)
 
-    if not HAS_PLAYWRIGHT:
+    image_files: list[str] = []
+
+    if HAS_PLAYWRIGHT:
+        image_files = _capture_from_html_string(html)
+
+    if not HAS_PLAYWRIGHT or not image_files:
         manual = generate_manual_screenshot_guide("lp.html", sections)
         guide = guide + chr(10) * 2 + manual
 
@@ -76,8 +83,24 @@ def convert_html(html: str) -> dict:
         "brain_draft.md": brain,
         "note_draft.md": note,
         "posting_guide.md": guide,
-        "image_files": [],
+        "image_files": image_files,
     }
+
+
+def _capture_from_html_string(html: str) -> list[str]:
+    """HTML文字列を一時ファイルに保存してPlaywrightでセクション画像を撮影する。"""
+    tmp_dir = tempfile.mkdtemp(prefix="synapse_lp_")
+    html_path = os.path.join(tmp_dir, "lp.html")
+    output_dir = os.path.join(tmp_dir, "sections")
+
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(html)
+
+    try:
+        images = capture_sections(html_path, output_dir)
+        return images
+    except Exception:
+        return []
 
 
 def create_manual_zip(result: dict) -> bytes:
