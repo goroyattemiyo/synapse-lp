@@ -19,7 +19,7 @@ class TestBuildChatPrompt:
     """プロンプト生成関数の検証。"""
 
     def test_prompt_contains_product_name(self):
-        from synapse.lp_ui_manual import _build_chat_prompt
+        from synapse.lp_manual_utils import build_chat_prompt as _build_chat_prompt
 
         data = {
             "name": "TestProduct",
@@ -35,7 +35,7 @@ class TestBuildChatPrompt:
         assert "1000円" in prompt
 
     def test_prompt_contains_html_rules(self):
-        from synapse.lp_ui_manual import _build_chat_prompt
+        from synapse.lp_manual_utils import build_chat_prompt as _build_chat_prompt
 
         prompt = _build_chat_prompt({"name": "X", "target": "Y", "price": "Z"})
         assert "data-section" in prompt
@@ -43,14 +43,14 @@ class TestBuildChatPrompt:
         assert "プレースホルダー" in prompt
 
     def test_prompt_contains_12_sections(self):
-        from synapse.lp_ui_manual import _build_chat_prompt
+        from synapse.lp_manual_utils import build_chat_prompt as _build_chat_prompt
 
         prompt = _build_chat_prompt({"name": "X"})
         assert "ファーストビュー" in prompt
         assert "最終CTA" in prompt
 
     def test_prompt_extra_included(self):
-        from synapse.lp_ui_manual import _build_chat_prompt
+        from synapse.lp_manual_utils import build_chat_prompt as _build_chat_prompt
 
         data = {"name": "X", "extra": "返金保証あり"}
         prompt = _build_chat_prompt(data)
@@ -61,7 +61,7 @@ class TestConvertHtml:
     """HTML変換関数の検証。"""
 
     def test_convert_returns_all_keys(self):
-        from synapse.lp_ui_manual import _convert_html
+        from synapse.lp_manual_utils import convert_html as _convert_html
 
         html = """<html><body>
         <section data-section="hero"><h1>Test</h1></section>
@@ -75,7 +75,7 @@ class TestConvertHtml:
         assert "image_files" in result
 
     def test_convert_brain_contains_sections(self):
-        from synapse.lp_ui_manual import _convert_html
+        from synapse.lp_manual_utils import convert_html as _convert_html
 
         html = """<html><body>
         <section data-section="hero"><h1>Hello</h1></section>
@@ -84,7 +84,7 @@ class TestConvertHtml:
         assert "ファーストビュー" in result["brain_draft.md"]
 
     def test_convert_preserves_original_html(self):
-        from synapse.lp_ui_manual import _convert_html
+        from synapse.lp_manual_utils import convert_html as _convert_html
 
         html = "<html><body><h1>Original</h1></body></html>"
         result = _convert_html(html)
@@ -98,7 +98,7 @@ class TestManualZip:
         import io
         import zipfile
 
-        from synapse.lp_ui_manual import _create_manual_zip
+        from synapse.lp_manual_utils import create_manual_zip as _create_manual_zip
 
         result = {
             "lp.html": "<h1>Test</h1>",
