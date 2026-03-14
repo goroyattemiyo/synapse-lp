@@ -27,7 +27,7 @@
 ## 2. ワークフロールール
 
 ### リポジトリ参照
-11. **ファイル参照ルール**: push後はリポジトリ（GitHub raw/API）から直接ファイルを参照する。ローカルキャッシュや会話履歴の記憶に頼らない
+11. **ファイル参照ルール**: push後はリポジトリ（GitHub raw/API）から直接ファイルを参照する
 12. **フェーズ遷移ルール**: 次のPhase/Sprintに進む際は、リポジトリから最新コードを全取得し現状を把握した上で設計議論を行ってから実装に入る
 13. **会話圧縮時の再読み込み**: 会話の圧縮が発生するたびに、必ず docs/RULES.md をリポジトリから再読み込みし、全ルールを再確認してから作業を継続する
 
@@ -50,7 +50,8 @@
 | 1 | ~~ドラフト生成の二段構成未完成~~ | 2026-03-14 | **解消済 2026-03-14** | lp_engine_drafts.py で接続完了 |
 | 2 | ~~E2Eテスト用CI未作成~~ | 2026-03-14 | **解消済 2026-03-14** | e2e.yml + e2e_lp.py 作成 |
 | 3 | engine.pyとlp_engine.pyの共通処理未抽出（engine_base.py） | 2026-03-14 | 低優先 | コード重複あり |
-| 4 | ~~lp_engine.py 238行~~ | 2026-03-14 | **解消済 2026-03-14** | 151行 + 124行に分割 |
+| 4 | ~~lp_engine.py 238行~~ | 2026-03-14 | **解消済 2026-03-14** | 分割完了 |
+| 5 | ~~画像パイプライン未接続~~ | 2026-03-14 | **解消済 2026-03-14** | capture_sections接続・ZIP同梱完了 |
 
 ---
 
@@ -58,18 +59,21 @@
 
 | ファイル | 行数 | 状態 |
 |----------|------|------|
-| synapse/lp_engine.py | 151 | OK |
+| synapse/lp_engine_drafts.py | 194 | OK |
 | synapse/draft_generator.py | 178 | OK |
+| synapse/lp_engine.py | 178 | OK |
 | synapse/image_pipeline.py | 157 | OK |
 | synapse/engine.py | 155 | OK |
-| synapse/lp_ui.py | 117 | OK |
-| synapse/lp_prompts.py | 90 | OK |
+| synapse/lp_ui.py | 135 | OK |
+| synapse/lp_prompts.py | 110 | OK |
 | synapse/agents.py | 79 | OK |
 | synapse/sandbox.py | 65 | OK |
 | synapse/prompts.py | 64 | OK |
 | synapse/tools.py | 56 | OK |
 | synapse/config.py | 24 | OK |
-| docs/DEVELOPMENT_PLAN.md | 249 | ⚠ 要注意（上限300） |
+| docs/DEVELOPMENT_PLAN.md | 255 | ⚠ 要注意（上限300） |
+
+**テスト状況**: 98テスト合格、1スキップ
 
 ---
 
@@ -78,3 +82,4 @@
 | 日付 | 変更内容 |
 |------|----------|
 | 2026-03-14 | 初版作成。Synapse/Synapse2のルールをPython/AIエージェント用に調整 |
+| 2026-03-14 | 技術的負債#5追加・解消。ファイルサイズ監視テーブル更新。テスト数98に更新 |
