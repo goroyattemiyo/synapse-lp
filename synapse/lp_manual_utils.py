@@ -4,7 +4,10 @@ Synapse - 手動LP変換ユーティリティ
 """
 
 import io
+import json
 import os
+import subprocess
+import sys
 import tempfile
 import zipfile
 
@@ -15,7 +18,6 @@ from synapse.draft_generator import (
 )
 from synapse.image_pipeline import (
     HAS_PLAYWRIGHT,
-    capture_sections,
     extract_sections,
     generate_manual_screenshot_guide,
 )
@@ -72,9 +74,9 @@ def convert_html(html: str) -> dict:
     image_files: list[str] = []
 
     if HAS_PLAYWRIGHT:
-        image_files = _capture_from_html_string(html)
+        image_files = _capture_via_subprocess(html)
 
-    if not HAS_PLAYWRIGHT or not image_files:
+    if not image_files:
         manual = generate_manual_screenshot_guide("lp.html", sections)
         guide = guide + chr(10) * 2 + manual
 
@@ -87,8 +89,8 @@ def convert_html(html: str) -> dict:
     }
 
 
-def _capture_from_html_string(html: str) -> list[str]:
-    """HTML文字列を一時ファイルに保存してPlaywrightでセクション画像を撮影する。"""
+def _capture_via_subprocess(html: str) -> list[str]:
+    """別プロセスでPlaywrightを起動してセクション画像を撮影する。"""
     tmp_dir = tempfile.mkdtemp(prefix="synapse_lp_")
     html_path = os.path.join(tmp_dir, "lp.html")
     output_dir = os.path.join(tmp_dir, "sections")
@@ -96,9 +98,24 @@ def _capture_from_html_string(html: str) -> list[str]:
     with open(html_path, "w", encoding="utf-8") as f:
         f.write(html)
 
+    script = (
+        "import json, sys;"
+        "from synapse.image_pipeline import capture_sections;"
+        f"imgs = capture_sections(r'{html_path}', r'{output_dir}');"
+        "print(json.dumps(imgs))"
+    )
+
     try:
-        images = capture_sections(html_path, output_dir)
-        return images
+        result = subprocess.run(
+            [sys.executable, "-c", script],
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            images = json.loads(result.stdout.strip())
+            return [img for img in images if os.path.exists(img)]
+        return []
     except Exception:
         return []
 

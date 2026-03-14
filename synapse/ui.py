@@ -13,7 +13,6 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# カスタムCSS
 st.markdown(
     """
     <style>
@@ -27,13 +26,6 @@ st.markdown(
         text-align: center; color: #666; font-size: 1rem;
         margin-bottom: 30px;
     }
-    .mode-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 16px; padding: 24px; color: white;
-        margin-bottom: 16px;
-    }
-    .mode-card h3 { margin: 0 0 8px; font-size: 1.1rem; }
-    .mode-card p { margin: 0; font-size: 0.85rem; opacity: 0.9; }
     .sidebar-header {
         font-size: 0.85rem; font-weight: 700; color: #1a1a2e;
         margin-bottom: 8px; padding-bottom: 8px;
@@ -47,11 +39,10 @@ st.markdown(
 
 def main():
     """メインエントリポイント。"""
-    # サイドバー
     st.sidebar.markdown('<div class="sidebar-header">🧠 シナプス LP</div>', unsafe_allow_html=True)
     mode = st.sidebar.radio(
         "モードを選択",
-        ["✨ 手動LP変換", "⚡ LP自動生成（API）", "🔧 通常モード"],
+        ["✨ 手動LP変換（おすすめ）", "⚡ LP自動生成（API）"],
         index=0,
         help="手動LP変換: APIキー不要で誰でも使えます",
     )
@@ -73,7 +64,6 @@ def main():
     st.sidebar.divider()
     st.sidebar.caption("v0.3.0 | 108テスト合格")
 
-    # メインエリア
     st.markdown(
         '<div class="main-title">🧠 シナプス LP ジェネレーター</div>', unsafe_allow_html=True
     )
@@ -86,40 +76,10 @@ def main():
         from synapse.lp_ui_manual import render_manual_mode
 
         render_manual_mode()
-    elif "API" in mode:
+    else:
         from synapse.lp_ui import render_lp_mode
 
         render_lp_mode()
-    else:
-        _render_normal_mode()
-
-
-def _render_normal_mode():
-    """通常モード。"""
-    st.markdown("### 🔧 通常モード")
-    st.info("目標を入力すると、3エージェントがコードを自動生成します。")
-    goal = st.text_area(
-        "達成したい目標", height=120, placeholder="例: Pythonで売上データを分析するスクリプト"
-    )
-    if st.button("🚀 生成開始", type="primary", use_container_width=True):
-        if not goal:
-            st.warning("目標を入力してください。")
-            return
-        with st.status("生成中...", expanded=True) as status:
-            try:
-                from synapse.engine import run_synapse
-
-                result = run_synapse(goal)
-                files = result.get("files", {})
-                approved = result.get("approved", False)
-                status.update(
-                    label="✅ 完了!" if approved else "⚠️ 完了（未承認）", state="complete"
-                )
-                for name, c in files.items():
-                    with st.expander(f"📄 {name}", expanded=True):
-                        st.code(c, language="python" if name.endswith(".py") else "text")
-            except Exception as e:
-                status.update(label=f"❌ エラー: {e}", state="error")
 
 
 if __name__ == "__main__":
