@@ -1,7 +1,6 @@
 """
 Synapse - LP生成エンジン
-フェーズA: HTML生成（Orchestrator -> Coder -> Reviewer）
-フェーズB: ドラフト生成（Coder -> Reviewer）
+エントリポイント + Phase A: HTML生成（Orchestrator -> Coder -> Reviewer）
 """
 
 import json
@@ -20,16 +19,16 @@ from synapse.config import (
     LP_ORCHESTRATOR_MODEL,
     LP_REVIEWER_MODEL,
 )
+from synapse.lp_engine_drafts import run_phase_b
 from synapse.lp_prompts import LP_CODER_SYSTEM, LP_ORCHESTRATOR_SYSTEM, LP_REVIEWER_SYSTEM
 from synapse.sandbox import Sandbox
 from synapse.tools import CODER_TOOLS, REVIEWER_TOOLS
 
 load_dotenv()
 
-LP_DRAFT_ROUNDS = 2
-
 
 def run_synapse_lp(product_info: str, callback: Any = None) -> dict[str, Any]:
+    """LP生成のメインエントリポイント。"""
     client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
     sandbox = Sandbox()
 
@@ -39,18 +38,18 @@ def run_synapse_lp(product_info: str, callback: Any = None) -> dict[str, Any]:
 
     def log(text: str) -> None:
         print(text)
-        log_file.write(text + "\n")
+        log_file.write(text + chr(10))
         log_file.flush()
 
     def notify(agent: str, content: str) -> None:
-        log(f"[{agent}]\n{content}\n")
+        log(f"[{agent}]" + chr(10) + f"{content}" + chr(10))
         if callback:
             callback(agent, content)
 
     log("=" * 60)
-    log("Synapse LP Generator v0.1.0")
+    log("Synapse LP Generator v0.2.0")
     log(f"Product: {product_info[:100]}")
-    log("=" * 60 + "\n")
+    log("=" * 60 + chr(10))
 
     result: dict[str, Any] = {
         "sandbox": sandbox,
@@ -63,18 +62,25 @@ def run_synapse_lp(product_info: str, callback: Any = None) -> dict[str, Any]:
     }
 
     try:
-        _run_phases(client, sandbox, product_info, result, notify, log)
+        run_phase_a(client, sandbox, product_info, result, notify, log)
+        if result["phase_a_approved"]:
+            run_phase_b(client, sandbox, result, notify, log)
+        result["approved"] = result["phase_a_approved"] and result["phase_b_approved"]
+        for file_path in sandbox.list_files():
+            content = sandbox.read_file(file_path)
+            result["files"][file_path] = content
+            log(f"--- {file_path} ---")
+            log(content)
     except Exception as e:
         notify("System", f"エラー: {str(e)}")
         result["error"] = str(e)
     finally:
         log_file.close()
-        print(f"\nログ保存先: logs/lp_{timestamp}.txt")
 
     return result
 
 
-def _run_phases(
+def run_phase_a(
     client: Any,
     sandbox: Sandbox,
     product_info: str,
@@ -82,7 +88,7 @@ def _run_phases(
     notify: Any,
     log: Any,
 ) -> None:
-    # Phase A: HTML生成
+    """Phase A: Orchestrator設計 -> Coder HTML生成 -> Reviewer検証。"""
     notify("System", "=== Phase A: LP HTML生成 ===")
 
     orch_messages = [
@@ -90,7 +96,7 @@ def _run_phases(
             "role": "user",
             "content": (
                 "以下の商品/サービス情報をもとに、"
-                f"売れるLPの構成を設計してください。\n\n{product_info}"
+                "売れるLPの構成を設計してください。" + chr(10) * 2 + product_info
             ),
         }
     ]
@@ -111,15 +117,20 @@ def _run_phases(
         result["rounds"] = round_num
         notify("System", f"--- Phase A Round {round_num}/{LP_MAX_ROUNDS} ---")
 
-        notify("System", "LP Coder がHTML生成中...")
         if round_num == 1:
             instruction = (
-                "以下のLP設計に従って、lp.html を生成してください。\n"
-                "単一HTMLファイルにCSS inline で全て含めてください。\n"
-                f"各セクションに data-section 属性を付与してください。\n\n{orch_reply}"
+                "以下のLP設計に従って、lp.html を生成してください。"
+                + chr(10)
+                + "単一HTMLファイルにCSS inline で全て含めてください。"
+                + chr(10)
+                + "各セクションに data-section 属性を付与してください。"
+                + chr(10) * 2
+                + orch_reply
             )
         else:
-            instruction = f"以下の指摘を修正してください。lp.html のみ修正:\n\n{reviewer_reply}"
+            instruction = (
+                "以下の指摘を修正してください。lp.html のみ修正:" + chr(10) * 2 + reviewer_reply
+            )
 
         coder_messages = [{"role": "user", "content": instruction}]
         coder_reply, _ = run_agent(
@@ -134,13 +145,17 @@ def _run_phases(
         )
         notify("Coder", coder_reply)
 
-        notify("System", "LP Reviewer がHTML検証中...")
         files = sandbox.list_files()
         review_instruction = (
-            f"以下のファイルからlp.htmlを検証してください。\n{json.dumps(files, ensure_ascii=False)}\n\n"
-            "構造チェック: 12セクション, data-section属性, CTAボタン, レスポンシブ\n"
-            "コピーチェック: 致命的問題のみ指摘\n"
-            "構造チェック全パス AND コピーに致命的問題なし -> APPROVED"
+            "以下のファイルからlp.htmlを検証してください。"
+            + chr(10)
+            + json.dumps(files, ensure_ascii=False)
+            + chr(10) * 2
+            + "構造チェック: 12セクション, data-section属性, CTAボタン, レスポンシブ"
+            + chr(10)
+            + "コピーチェック: 致命的問題のみ指摘"
+            + chr(10)
+            + "構造チェック全パス AND コピーに致命的問題なし -> APPROVED"
         )
         reviewer_messages = [{"role": "user", "content": review_instruction}]
         reviewer_reply, _ = run_agent(
@@ -161,78 +176,3 @@ def _run_phases(
             break
     else:
         notify("System", f"Phase A: {LP_MAX_ROUNDS}ラウンドでHTML承認に至らず")
-
-    # Phase B: ドラフト生成
-    if result["phase_a_approved"]:
-        notify("System", "=== Phase B: ドラフト生成 ===")
-        html_content = sandbox.read_file("lp.html")
-        reviewer_reply = ""
-
-        for draft_round in range(1, LP_DRAFT_ROUNDS + 1):
-            notify("System", f"--- Phase B Round {draft_round}/{LP_DRAFT_ROUNDS} ---")
-
-            notify("System", "LP Coder がドラフト生成中...")
-            if draft_round == 1:
-                draft_instruction = (
-                    "以下のlp.htmlの内容をもとに、3つのファイルを生成してください。\n\n"
-                    "1. brain_draft.md - Brain投稿用テキスト\n"
-                    "   制約: 見出し(h2,h3), 太字, 引用, 画像のみ使用可。文字色/サイズ不可\n"
-                    "   ビジュアル部分は [画像: セクション名] と記載\n\n"
-                    "2. note_draft.md - Note投稿用テキスト\n"
-                    "   制約: 見出し(h2,h3), 太字, 箇条書き, 引用, 画像。table/文字色不可\n"
-                    "   ビジュアル部分は [画像: セクション名] と記載\n\n"
-                    "3. posting_guide.md - 投稿手順ガイド\n\n"
-                    f"=== lp.html ===\n{html_content[:8000]}"
-                )
-            else:
-                draft_instruction = f"以下の指摘を修正してください:\n\n{reviewer_reply}"
-
-            coder_messages = [{"role": "user", "content": draft_instruction}]
-            coder_reply, _ = run_agent(
-                client,
-                LP_CODER_MODEL,
-                LP_CODER_SYSTEM,
-                coder_messages,
-                CODER_TOOLS,
-                sandbox,
-                log,
-                max_tokens=LP_MAX_TOKENS,
-            )
-            notify("Coder", coder_reply)
-
-            notify("System", "LP Reviewer がドラフト検証中...")
-            files = sandbox.list_files()
-            draft_review = (
-                f"以下のファイルを検証してください。\n{json.dumps(files, ensure_ascii=False)}\n\n"
-                "検証: brain_draft.md/note_draft.md/posting_guide.md が存在し制約を守っているか\n"
-                "全て問題なければ APPROVED"
-            )
-            reviewer_messages = [{"role": "user", "content": draft_review}]
-            reviewer_reply, _ = run_agent(
-                client,
-                LP_REVIEWER_MODEL,
-                LP_REVIEWER_SYSTEM,
-                reviewer_messages,
-                REVIEWER_TOOLS,
-                sandbox,
-                log,
-                max_tokens=LP_MAX_TOKENS,
-            )
-            notify("Reviewer", reviewer_reply)
-
-            if "APPROVED" in reviewer_reply:
-                notify("System", f"Phase B: Round {draft_round} でドラフト承認!")
-                result["phase_b_approved"] = True
-                break
-        else:
-            notify("System", f"Phase B: {LP_DRAFT_ROUNDS}ラウンドでドラフト承認に至らず")
-
-    result["approved"] = result["phase_a_approved"] and result["phase_b_approved"]
-
-    for file_path in sandbox.list_files():
-        content = sandbox.read_file(file_path)
-        result["files"][file_path] = content
-        log(f"\n--- {file_path} ---")
-        log(content)
-
-    log(f"\nWorkspace: {sandbox.workspace}")

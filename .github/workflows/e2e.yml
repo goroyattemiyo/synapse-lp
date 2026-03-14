@@ -1,0 +1,33 @@
+name: E2E Test
+on:
+  workflow_dispatch:
+    inputs:
+      product_info:
+        description: "テスト用商品情報"
+        required: false
+        default: "AI活用ガイド。ターゲットは副業初心者。価格1000円。"
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
+      - name: Run E2E LP generation
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python tests/e2e_lp.py
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lp-output
+          path: logs/
