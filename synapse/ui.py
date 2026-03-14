@@ -7,7 +7,7 @@ import os
 import streamlit as st
 
 st.set_page_config(
-    page_title="シナプス LP ジェネレーター",
+    page_title="PostCraft ジェネレーター",
     page_icon="🧠",
     layout="centered",
     initial_sidebar_state="expanded",
@@ -39,7 +39,7 @@ st.markdown(
 
 def main():
     """メインエントリポイント。"""
-    st.sidebar.markdown('<div class="sidebar-header">🧠 シナプス LP</div>', unsafe_allow_html=True)
+    st.sidebar.markdown('<div class="sidebar-header">🧠 PostCraft</div>', unsafe_allow_html=True)
     mode = st.sidebar.radio(
         "モードを選択",
         ["✨ 手動LP変換（おすすめ）", "⚡ LP自動生成（API）"],
@@ -64,9 +64,7 @@ def main():
     st.sidebar.divider()
     st.sidebar.caption("v0.3.0 | 108テスト合格")
 
-    st.markdown(
-        '<div class="main-title">🧠 シナプス LP ジェネレーター</div>', unsafe_allow_html=True
-    )
+    st.markdown('<div class="main-title">🧠 PostCraft ジェネレーター</div>', unsafe_allow_html=True)
     st.markdown(
         '<div class="main-sub">Brain・Note向けの売れるLPコンテンツを自動生成</div>',
         unsafe_allow_html=True,

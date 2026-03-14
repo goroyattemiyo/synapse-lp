@@ -1,58 +1,52 @@
-# Synapse LP Generator
+# PostCraft
 
-Synapse マルチAIエージェント基盤を拡張し、Brain/Note向けの
-LP品質コンテンツを自動生成するツール。
+HTMLからBrain/Note投稿素材を一括生成する変換ツール。
 
-## 機能
+## 概要
 
-- フルデザインHTML LP自動生成（inline CSS、レスポンシブ）
-- セクション画像自動生成（Playwright、オプショナル）
-- Brain投稿用ドラフト自動生成（有料境界マーカー付き）
-- Note投稿用ドラフト自動生成（目次自動挿入）
-- 投稿手順ガイド + チェックリスト自動生成
-- Streamlit Web UI（モード切替・プレビュー・ZIP DL）
+LPのHTMLを貼り付けるだけで、Brain/Note用のセクション画像・投稿原稿・投稿ガイドを自動生成します。
 
-## アーキテクチャ
+## 主な機能
 
-3エージェント構成: Orchestrator → Coder → Reviewer
-
-LP生成は2フェーズ:
-- Phase A: HTML生成（構造検証+コピー検証）
-- Phase B: ドラフト生成（Brain/Note最適化）
+- セクション画像自動生成: HTMLの各セクションをPNG画像として切り出し（Playwright使用）
+- Brain/Note原稿生成: 有料境界マーカー・画像プレースホルダー付きの投稿原稿を自動作成
+- 投稿ガイド生成: Brain/Noteへの投稿手順・チェックリストを自動生成
+- 配色テーマ選択: 7種のプリセット＋カスタム配色でLP生成プロンプトを最適化
+- ZIP一括ダウンロード: HTML・画像・原稿・ガイドをまとめてダウンロード
 
 ## セットアップ
 
-`ash
-git clone https://github.com/goroyattemiyo/synapse-lp.git
-cd synapse-lp
-pip install -r requirements.txt
-echo "ANTHROPIC_API_KEY=sk-..." > .env
-`
+    git clone https://github.com/goroyattemiyo/postcraft.git
+    cd postcraft
+    pip install -r requirements.txt
+    playwright install chromium
 
-## 実行
+## 使い方
 
-`ash
-# Web UI
-streamlit run synapse/ui.py
+    streamlit run synapse/ui.py
 
-# LP生成（CUI）
-python -c "from synapse.lp_engine import run_synapse_lp; run_synapse_lp('商品情報をここに')"
-`
+1. 商品情報を入力（配色テーマを選択）
+2. 生成されたプロンプトをAIチャットに貼り付けてHTMLを生成
+3. 完成したHTMLをStep 3に貼り付け
+4. Brain/Note素材が自動生成、ZIPでダウンロード
 
-## テスト
+## 出力ファイル
 
-`ash
-pip install -r requirements-dev.txt
-pytest tests/ -v
-`
+- lp.html: LP本体
+- sections/*.png: セクション画像
+- brain_draft.md: Brain投稿用原稿
+- note_draft.md: Note投稿用原稿
+- posting_guide.md: 投稿手順ガイド
 
-## 開発ドキュメント
+## 開発
 
-- [開発計画書](docs/DEVELOPMENT_PLAN.md)
+    pip install -r requirements-dev.txt
+    ruff format . && ruff check . && mypy synapse/ --ignore-missing-imports
+    pytest tests/ -v
 
 ## テスト状況
 
-78テスト通過 / 1スキップ（Windows環境タイムアウトテスト）
+116テスト合格 / 1スキップ
 
 ## ライセンス
 

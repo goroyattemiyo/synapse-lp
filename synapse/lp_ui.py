@@ -45,9 +45,9 @@ def _run_lp_generation(product_info: str):
         status.write(f"**{role}**: {msg[:100]}")
 
     try:
-        from synapse.lp_engine import run_synapse_lp
+        from synapse.lp_engine import run_postcraft
 
-        result = run_synapse_lp(product_info, callback=callback)
+        result = run_postcraft(product_info, callback=callback)
         st.session_state["lp_result"] = result
         if result.get("approved"):
             status.update(label="LP生成完了!", state="complete")
@@ -97,7 +97,7 @@ def _render_results(result: dict):
     st.download_button(
         label="全ファイルをZIPダウンロード",
         data=zip_buffer,
-        file_name="synapse_lp_output.zip",
+        file_name="postcraft_output.zip",
         mime="application/zip",
         use_container_width=True,
     )

@@ -158,7 +158,7 @@ def render_manual_mode():
         st.download_button(
             "全素材をZIPでダウンロード",
             zip_bytes,
-            "synapse_lp_output.zip",
+            "postcraft_output.zip",
             "application/zip",
             use_container_width=True,
             type="primary",
