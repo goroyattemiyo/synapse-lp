@@ -124,6 +124,18 @@ def capture_sections(html_path: str, output_dir: str) -> list[str]:
         page.goto(f"file://{html_path}")
         page.wait_for_load_state("networkidle")
 
+        # CSSアニメーション無効化 & opacity/visibility強制表示
+        page.evaluate("""() => {
+            const s = document.createElement('style');
+            s.textContent = '*, *::before, *::after { animation: none !important; transition: none !important; opacity: 1 !important; visibility: visible !important; }';
+            document.head.appendChild(s);
+        }""")
+
+        # フォント読み込み完了待機
+        page.wait_for_function("document.fonts.ready.then(() => true)")
+        page.wait_for_timeout(1000)
+        page.wait_for_timeout(2000)
+
         sections = page.query_selector_all("[data-section]")
         if not sections:
             sections = page.query_selector_all("section")
