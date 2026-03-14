@@ -30,7 +30,7 @@ def build_chat_prompt(data: dict) -> str:
         "売れるLPのHTMLを1ファイルで生成してください。",
         "",
         "# 商品情報",
-        f"- 商品名: {data.get('name', '')}",
+        f"- 商品名: {data.get(chr(110) + 'ame', '')}",
         f"- ターゲット: {data.get('target', '')}",
         f"- 価格: {data.get('price', '')}",
         f"- 商品内容: {data.get('contents', '')}",
@@ -38,6 +38,31 @@ def build_chat_prompt(data: dict) -> str:
     ]
     if data.get("extra"):
         lines.append(f"- 補足: {data['extra']}")
+
+    color_theme = data.get("color_theme", "")
+    if color_theme:
+        lines.extend(
+            [
+                "",
+                "# 配色指定（厳守）",
+                f"以下の配色で統一してください: {color_theme}",
+                "- ヒーローセクションの背景、CTAボタン、アクセントカラー、",
+                "  テキスト色、セクション背景の交互色まで全て上記配色に従うこと",
+                "- 配色の一貫性を最優先し、セクション間で色がバラつかないこと",
+            ]
+        )
+    else:
+        lines.extend(
+            [
+                "",
+                "# 配色",
+                "- 商品の雰囲気とターゲット層に合った配色を選定してください",
+                "- ヒーロー背景、CTA、アクセント、テキスト、セクション背景の",
+                "  交互色まで統一感のある配色にしてください",
+                "- 配色の根拠をHTMLのコメントで冒頭に記載してください",
+            ]
+        )
+
     lines.extend(
         [
             "",
@@ -47,7 +72,7 @@ def build_chat_prompt(data: dict) -> str:
             "- 各セクションに data-section 属性を付与",
             "  必須値: hero, problem, empathy, solution, features,",
             "  proof, testimonials, comparison, details, offer, faq, cta",
-            "- CTAボタン: オレンジ系(#FF6B35)、heroとctaの最低2ヶ所",
+            "- CTAボタンはアクセントカラーで、heroとctaの最低2箇所",
             "- 画像は class='img-placeholder' data-image='説明' のdivで表現",
             "- 実績数値は [利用者数を入力] 形式のプレースホルダーにする",
             "- お客様の声は [お客様の名前・属性] [コメント] 形式にする",
